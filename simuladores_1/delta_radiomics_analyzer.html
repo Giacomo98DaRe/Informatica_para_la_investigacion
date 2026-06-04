@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delta-Radiomics Analyzer | MR-Linac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">Δ</div>
+    <div>
+      <h1>Delta-Radiomics Analyzer</h1>
+      <p>MR-Linac · Respuesta tumoral · NAIARA</p>
+    </div>
+  </div>
+  <button id="btn-nuevo" onclick="resetToUpload()">↩ Nuevo análisis</button>
+</header>
+
+<main>
+
+<!-- ════════════════════ FASE 1 — UPLOAD ════════════════════ -->
+<section id="phase-upload">
+  <div class="upload-header">
+    <h2>Analizador de Delta-Radiomics</h2>
+    <p>Carga un Excel con los timepoints MR-Linac para calcular Δ% y clasificar la respuesta tumoral.</p>
+  </div>
+
+  <div class="drop-zone" id="drop-zone">
+    <div class="dz-icon">📂</div>
+    <h3>Arrastra tu archivo Excel aquí</h3>
+    <p>Formato esperado: una hoja por timepoint · columnas Feature | Value</p>
+    <div class="dz-actions">
+      <button class="btn-primary" onclick="document.getElementById('file-input').click()">↑ Cargar Excel</button>
+      <button class="btn-secondary" id="btn-analyze" onclick="startAnalysis()" disabled>▶ Analizar</button>
+    </div>
+    <p id="loaded-file" class="loaded-file"></p>
+    <input type="file" id="file-input" accept=".xlsx,.xls">
+  </div>
+</section>
+
+<!-- ════════════════════ FASE 2 — PIPELINE ════════════════════ -->
+<section id="phase-pipeline">
+  <div class="pipeline-header">
+    <h2>Pipeline de análisis</h2>
+    <p id="pipeline-filename"></p>
+  </div>
+  <div class="pipeline-steps">
+
+    <div class="pipe-card" id="pc1">
+      <div class="pipe-card-icon">📋</div>
+      <h3>1 · Carga e indexación de datos</h3>
+      <p id="pc1-text"></p>
+      <button class="pipe-next" onclick="advancePipeline(2)">Siguiente →</button>
+    </div>
+
+    <div class="pipe-card p-hidden" id="pc2">
+      <div class="pipe-card-icon">📈</div>
+      <h3>2 · Cálculo de variación longitudinal (Δ%)</h3>
+      <p id="pc2-text"></p>
+      <button class="pipe-next" onclick="advancePipeline(3)">Siguiente →</button>
+    </div>
+
+    <div class="pipe-card p-hidden" id="pc3">
+      <div class="pipe-card-icon">🔍</div>
+      <h3>3 · Clasificación por umbral clínico</h3>
+      <p id="pc3-text"></p>
+      <button class="pipe-next" onclick="advancePipeline(4)">Siguiente →</button>
+    </div>
+
+    <div class="pipe-card p-hidden" id="pc4">
+      <div class="pipe-card-icon">🎯</div>
+      <h3 id="pc4-title">4 · Score de respuesta global</h3>
+      <p id="pc4-text"></p>
+      <button class="pipe-next final" onclick="showResults()">Ver resultados →</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════ FASE 3 — RESULTS ════════════════════ -->
+<section id="phase-results">
+  <div class="results-header">
+    <h2>Informe de respuesta tumoral</h2>
+    <p id="results-subtitle"></p>
+  </div>
+
+  <div class="results-grid">
+
+    <!-- LEFT: tabla features -->
+    <div class="table-card">
+      <div class="table-card-title">Features radiómicas · Δ% respecto al timepoint basal</div>
+      <div class="table-scroll">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Categoría</th>
+              <th>Basal</th>
+              <th>Último</th>
+              <th>Δ%</th>
+              <th>Clasificación</th>
+            </tr>
+          </thead>
+          <tbody id="results-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: score + chart -->
+    <div class="right-col">
+
+      <div class="score-card">
+        <div class="score-number" id="score-number">—</div>
+        <div class="score-label"  id="score-label">—</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" id="score-bar" style="width:0%"></div>
+        </div>
+        <div class="score-counts">
+          <div class="count-box">
+            <div class="count-num" id="cnt-resp" style="color:var(--green)">0</div>
+            <div class="count-lbl">Respuesta</div>
+          </div>
+          <div class="count-box">
+            <div class="count-num" id="cnt-est" style="color:var(--muted)">0</div>
+            <div class="count-lbl">Estable</div>
+          </div>
+          <div class="count-box">
+            <div class="count-num" id="cnt-res" style="color:var(--red)">0</div>
+            <div class="count-lbl">Resistencia</div>
+          </div>
+        </div>
+        <p class="score-note" id="score-note"></p>
+        <div class="dl-row">
+          <div style="flex:1">
+            <button class="btn-dl" style="width:100%" onclick="downloadJSON()">⬇ JSON</button>
+            <span class="dl-sub">Informe completo · Δ% por feature</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-title">
+          <span>Distribución Δ% por feature</span>
+          <button class="btn-dl-svg" onclick="downloadChartSVG()">⬇ SVG</button>
+        </div>
+        <div id="chart-wrap"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Feature trend over time -->
+  <div class="trend-card">
+    <div class="trend-card-title">
+      <span>Evolución temporal por feature</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <select id="feature-select" class="feature-select" onchange="updateTrendChart()"></select>
+        <button class="btn-dl-svg" onclick="downloadTrendSVG()">⬇ SVG</button>
+      </div>
+    </div>
+    <div id="trend-chart-wrap"></div>
+  </div>
+
+</section>
+
+</main>
+
+<div id="feature-tooltip"></div>
+
+<script src="main.js"></script>
+</body>
+</html>
