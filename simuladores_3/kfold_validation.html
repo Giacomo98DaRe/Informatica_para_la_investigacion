@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K-fold Cross Validation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&family=Playfair+Display:wght@700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <h1>K-fold Cross Validation - Validacion del modelo</h1>
+
+    <section class="control">
+      <label id="kLabel" for="kRange">k = 5 fold</label>
+      <input id="kRange" type="range" min="2" max="10" step="1" value="5" />
+    </section>
+
+    <div id="foldInfo" class="fold-info"></div>
+    <section class="samples" id="samplesGrid" aria-label="Distribucion de muestras"></section>
+
+    <div class="actions">
+      <button id="nextFoldBtn" type="button">▶ Siguiente fold</button>
+    </div>
+
+    <section class="cards">
+      <article class="card">
+        <div class="k">Total muestras</div>
+        <div class="v">60</div>
+      </article>
+      <article class="card">
+        <div class="k">Tamano del fold</div>
+        <div class="v" id="foldSize">~12</div>
+      </article>
+      <article class="card">
+        <div class="k">Iteraciones</div>
+        <div class="v" id="iterations">5</div>
+      </article>
+    </section>
+
+    <p class="note">
+      El esquema K-fold evalua el modelo sobre multiples particiones,
+      reduciendo el sesgo que puede aparecer con un unico split train/test.
+    </p>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
