@@ -1,0 +1,37 @@
+/* Styles for ROC simulator - aqua theme */
+:root{
+  --bg:#eaf9f7;
+  --surface:#ffffff;
+  --border:#dff3f0;
+  --text:#0f2430;
+  --muted:#5b8b8a;
+  --accent:#00a99a; /* aqua */
+  --accent-strong:#007f6f;
+  --blue:#2e70d8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:linear-gradient(160deg,#f8fdfc 0%,var(--bg)55%,#e9f7f6 100%);
+  color:var(--text);
+  font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,Arial;
+  padding:24px;
+}
+.wrap{max-width:980px;margin:0 auto}
+h1{margin:0 0 18px;font-family:'Syne',serif;font-weight:700;font-size:1.9rem;color:var(--accent-strong)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:0 8px 20px rgba(0,169,154,0.06)}
+canvas{width:100%;max-width:380px;height:auto;display:block;margin:0 auto;background:#fcfffe;border:1px solid var(--border);border-radius:10px}
+.control label{display:block;font-family:'Space Mono',monospace;color:var(--muted);margin-bottom:8px;font-size:0.95rem}
+input[type=range]{width:100%;accent-color:var(--accent-strong);margin:0 0 14px}
+.matrix{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.cell{padding:12px;text-align:center;border:1px solid rgba(255,255,255,0.8)}
+.cell .k{display:block;font-size:0.78rem;color:rgba(15,36,48,0.85);margin-bottom:6px;font-weight:600}
+.cell .v{font-family:'Space Mono',monospace;font-size:1.25rem;font-weight:600}
+.tp,.tn{background:rgba(0,169,154,0.12)}
+.fp,.fn{background:rgba(212,56,56,0.12)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{border:1px solid var(--border);background:#f8fffd;border-radius:10px;padding:10px;text-align:center}
+.metric .k{font-size:0.77rem;color:var(--muted);margin-bottom:4px}
+.metric .v{font-family:'Space Mono',monospace;font-size:1.12rem;font-weight:600}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
